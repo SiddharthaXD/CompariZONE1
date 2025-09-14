@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarthi - Your Digital Travel Companion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-blue: #00b4d8;
+            --accent-green: #00f5a0;
+            --accent-hover: #0077b6;
+            --border-color: #333333;
+            --gradient: linear-gradient(135deg, #00b4d8, #00f5a0);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--accent-blue);
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent-blue);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-blue);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 180, 216, 0.1), rgba(0, 245, 160, 0.1));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 180, 216, 0.2), transparent);
+            border-radius: 50%;
+            filter: blur(80px);
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Quick Search */
+        .quick-search {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin-top: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.8rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 180, 216, 0.3);
+        }
+
+        /* Content Sections */
+        .content {
+            display: none;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 30px rgba(0, 180, 216, 0.2);
+        }
+
+        /* Ticketing Form */
+        .ticket-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        /* Bus List */
+        .bus-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .bus-item {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .bus-item:hover {
+            border-color: var(--accent-blue);
+            transform: translateX(5px);
+        }
+
+        .bus-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+
+        .bus-route {
+            color: var(--text-secondary);
+        }
+
+        .bus-time {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .bus-price {
+            font-size: 1.2rem;
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        /* Map Container */
+        #map {
+            height: 500px;
+            border-radius: 12px;
+            margin: 2rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ETA Cards */
+        .eta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .eta-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-blue);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .eta-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(0, 180, 216, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        .eta-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .eta-status.on-time {
+            background: rgba(0, 245, 160, 0.2);
+            color: var(--accent-green);
+        }
+
+        .eta-status.delayed {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-secondary);
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .bus-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Contact Section */
+        .contact-info {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .contact-item i {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-bus"></i>
+                Sarthi
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-page="ticketing">Ticketing</a></li>
+                <li><a href="#" class="nav-link" data-page="routes">Routes</a></li>
+                <li><a href="#" class="nav-link" data-page="stops">Bus Stops</a></li>
+                <li><a href="#" class="nav-link" data-page="eta">ETA</a></li>
+                <li><a href="#" class="nav-link" data-page="contact">Contact Us</a></li>
+            </ul>
+            <div class="mobile-menu" id="mobileMenu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Welcome to Sarthi</h1>
+            <p>Your Digital Travel Companion for Punjab Bus Services</p>
+            
+            <!-- Quick Search -->
+            <div class="quick-search">
+                <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Quick Bus Search</h3>
+                <form class="search-form">
+                    <div class="form-group">
+                        <label>From</label>
+                        <input type="text" placeholder="Enter departure city" list="cities">
+                    </div>
+                    <div class="form-group">
+                        <label>To</label>
+                        <input type="text" placeholder="Enter destination" list="cities">
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-search"></i>
+                        Search Buses
+                    </button>
+                </form>
+                <datalist id="cities">
+                    <option value="Amritsar">
+                    <option value="Ludhiana">
+                    <option value="Jalandhar">
+                    <option value="Patiala">
+                    <option value="Bathinda">
+                    <option value="Mohali">
+                    <option value="Pathankot">
+                    <option value="Hoshiarpur">
+                    <option value="Batala">
+                    <option value="Moga">
+                </datalist>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Content -->
+    <div class="content active" id="home">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Active Buses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">150+</div>
+                <div class="stat-label">Routes Covered</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">50K+</div>
+                <div class="stat-label">Daily Passengers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">On-Time Performance</div>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0; color: var(--text-primary);">Popular Routes</h2>
+        <div class="bus-list">
+            <div class="bus-item">
+                <div class="bus-number">PB-01-2456</div>
+                <div class="bus-route">Amritsar → Ludhiana</div>
+                <div class="bus-time">
+                    <i class="far fa-clock"></i>
+                    6:00 AM
+                </div>
+                <div class="bus-price">₹250</div>
+                <button class="btn-primary">Book Now</button>
+            </div>
+            <div class="bus-item">
+                <div class="bus-number">PB-03-1289</div>
+                <div class="bus-route">Jalandhar → Patiala</div>
+                <div class="bus-time">
+                    <i class="far fa-clock"></i>
+                    8:30 AM
+                </div>
+                <div class="bus-price">₹180</div>
+                <button class="btn-primary">Book Now</button>
+            </div>
+            <div class="bus-item">
+                <div class="bus-number">PB-05-3678</div>
+                <div class="bus-route">Bathinda → Mohali</div>
+                <div class="bus-time">
+                    <i class="far fa-clock"></i>
+                    10:00 AM
+                </div>
+                <div class="bus-price">₹320</div>
+                <button class="btn-primary">Book Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticketing Content -->
+    <div class="content" id="ticketing">
+        <h2 style="margin-bottom: 2rem; color: var(--text-primary);">Book Your Ticket</h2>
+        <div class="ticket-form">
+            <div class="form-group">
+                <label>From</label>
+                <select>
+                    <option>Select Departure City</option>
+                    <option>Amritsar</option>
+                    <option>Ludhiana</option>
+                    <option>Jalandhar</option>
+                    <option>Patiala</option>
+                    <option>Bathinda</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>To</label>
+                <select>
+                    <option>Select Destination</option>
+                    <option>Mohali</option>
+                    <option>Pathankot</option>
+                    <option>Hoshiarpur</option>
+                    <option>Batala</option>
+                    <option>Moga</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Journey Date</label>
+                <input type="date">
+            </div>
+            <div class="form-group">
+                <label>Number of Passengers</label>
+                <input type="number" min="1" max="10" value="1">
+            </div>
+            <div class="form-group">
+                <label>Bus Type</label>
+                <select>
+                    <option>All Types</option>
+                    <option>AC Bus</option>
+                    <option>Non-AC Bus</option>
+                    <option>Volvo</option>
+                    <option>Sleeper</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button class="btn-primary" style="width: 100%;">
+                    <i class="fas fa-ticket-alt"></i>
+                    Search Available Buses
+                </button>
+            </div>
+        </div>
+
+        <h3 style="margin: 2rem 0 1rem; color: var(--text-primary);">Available Buses</h3>
+        <div class="bus-list">
+            <div class="bus-item">
+                <div class="bus-number">PB-02-4567</div>
+                <div class="bus-route">AC Volvo - 40 Seats Available</div>
+                <div class="bus-time">
+                    <i class="far fa-clock"></i>
+                    7:00 AM - 11:30 AM
+                </div>
+                <div class="bus-price">₹450</div>
+                <button class="btn-primary">Select Seats</button>
+            </div>
+            <div class="bus-item">
+                <div class="bus-number">PB-07-8901</div>
+                <div class="bus-route">Non-AC - 25 Seats Available</div>
+                <div class="bus-time">
+                    <i class="far fa-clock"></i>
+                    9:00 AM - 1:30 PM
+                </div>
+                <div class="bus-price">₹280</div>
+                <button class="btn-primary">Select Seats</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Routes Content -->
+    <div class="content" id="routes">
+        <h2 style="margin-bottom: 2rem; color: var(--text-primary);">Punjab Bus Routes</h2>
+        <div id="map"></div>
+        
+        <h3 style="margin: 2rem 0 1rem; color: var(--text-primary);">Major Routes</h3>
+        <div class="card">
+            <h4 style="color: var(--accent-blue); margin-bottom: 1rem;">Northern Punjab Routes</h4>
+            <p style="color: var(--text-secondary); line-height: 1.8;">
+                Amritsar ↔ Gurdaspur ↔ Pathankot ↔ Batala ↔ Tarn Taran
+            </p>
+        </div>
+        <div class="card">
+            <h4 style="color: var(--accent-blue); margin-bottom: 1rem;">Central Punjab Routes</h4>
+            <p style="color: var(--text-secondary); line-height: 1.8;">
+                Ludhiana ↔ Jalandhar ↔ Phagwara ↔ Hoshiarpur ↔ Kapurthala
+            </p>
+        </div>
+        <div class="card">
+            <h4 style="color: var(--accent-blue); margin-bottom: 1rem;">Southern Punjab Routes</h4>
+            <p style="color: var(--text-secondary); line-height: 1.8;">
+                Bathinda ↔ Mansa ↔ Sangrur ↔ Barnala ↔ Faridkot ↔ Muktsar
+            </p>
+        </div>
+        <div class="card">
+            <h4 style="color: var(--accent-blue); margin-bottom: 1rem;">Eastern Punjab Routes</h4>
+            <p style="color: var(--text-secondary); line-height: 1.8;">
+                Patiala ↔ Rajpura ↔ Mohali ↔ Ropar ↔ Fatehgarh Sahib
+            </p>
+        </div>
+    </div>
+
+    <!-- Bus Stops Content -->
+    <div class="content" id="stops">
+        <h2 style="margin-bottom: 2rem; color: var(--text-primary);">Bus Stops in Tier-2 Cities</h2>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">Bathinda</div>
+                <div class="stat-label">12 Bus Stops</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">Pathankot</div>
+                <div class="stat-label">8 Bus Stops</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">Hoshiarpur</div>
+                <div class="stat-label">10 Bus Stops</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">Moga</div>
+                <div class="stat-label">7 Bus Stops</div>
+            </div>
+        </div>
+
+        <h3 style="margin: 2rem 0 1rem; color: var(--text-primary);">Select City to View Stops</h3>
+        <select class="form-group" style="max-width: 300px; margin-bottom: 2rem;" onchange="showCityStops(this.value)">
+            <option>Choose a City</option>
+            <option value="bathinda">Bathinda</option>
+            <option value="pathankot">Pathankot</option>
+            <option value="hoshiarpur">Hoshiarpur</option>
+            <option value="moga">Moga</option>
+            <option value="barnala">Barnala</option>
+            <option value="batala">Batala</option>
+        </select>
+
+        <div id="cityStops" class="bus-list"></div>
+    </div>
+
+    <!-- ETA Content -->
+    <div class="content" id="eta">
+        <h2 style="margin-bottom: 2rem; color: var(--text-primary);">Live Bus Tracking - ETA</h2>
+        
+        <div class="quick-search" style="margin-bottom: 2rem;">
+            <form class="search-form">
+                <div class="form-group">
+                    <label>Enter Bus Number</label>
+                    <input type="text" placeholder="e.g., PB-01-2456">
+                </div>
+                <div class="form-group">
+                    <label>Or Select Route</label>
+                    <select>
+                        <option>All Routes</option>
+                        <option>Amritsar - Ludhiana</option>
+                        <option>Jalandhar - Patiala</option>
+                        <option>Bathinda - Mohali</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-location-arrow"></i>
+                    Track Bus
+                </button>
+            </form>
+        </div>
+
+        <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Currently Tracking</h3>
+        <div class="eta-grid">
+            <div class="eta-card">
+                <h4 style="color: var(--accent-blue);">PB-01-2456</h4>
+                <p style="color: var(--text-secondary); margin: 0.5rem 0;">Amritsar → Ludhiana</p>
+                <p style="font-size: 1.5rem; margin: 1rem 0;">ETA: 11:45 AM</p>
+                <p style="color: var(--text-secondary);">Current Location: Near Jalandhar Bypass</p>
+                <span class="eta-status on-time">On Time</span>
+            </div>
+            <div class="eta-card">
+                <h4 style="color: var(--accent-blue);">PB-03-1289</h4>
+                <p style="color: var(--text-secondary); margin: 0.5rem 0;">Jalandhar → Patiala</p>
+                <p style="font-size: 1.5rem; margin: 1rem 0;">ETA: 2:15 PM</p>
+                <p style="color: var(--text-secondary);">Current Location: Phagwara</p>
+                <span class="eta-status delayed">Delayed by 15 min</span>
+            </div>
+            <div class="eta-card">
+                <h4 style="color: var(--accent-blue);">PB-05-3678</h4>
+                <p style="color: var(--text-secondary); margin: 0.5rem 0;">Bathinda → Mohali</p>
+                <p style="font-size: 1.5rem; margin: 1rem 0;">ETA: 3:30 PM</p>
+                <p style="color: var(--text-secondary);">Current Location: Sangrur</p>
+                <span class="eta-status on-time">On Time</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 3rem; padding: 2rem; background: var(--bg-card); border-radius: 12px;">
+            <h3 style="color: var(--text-primary); margin-bottom: 1rem;">
+                <i class="fas fa-info-circle" style="color: var(--accent-blue);"></i>
+                How Live Tracking Works
+            </h3>
+            <p style="color: var(--text-secondary); line-height: 1.8;">
+                Our advanced GPS tracking system provides real-time location updates for all buses in the Punjab fleet. 
+                Get accurate ETAs, delay notifications, and current bus positions to plan your journey better.
+            </p>
+        </div>
+    </div>
+
+    <!-- Contact Content -->
+    <div class="content" id="contact">
+        <h2 style="margin-bottom: 2rem; color: var(--text-primary);">Contact Us</h2>
+        
+        <div class="contact-info">
+            <div class="contact-item">
+                <i class="fas fa-phone-alt"></i>
+                <div>
+                    <h4 style="color: var(--text-primary);">24/7 Helpline</h4>
+                    <p style="color: var(--text-secondary);">+91 1800-xxx-xxxx</p>
+                </div>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <div>
+                    <h4 style="color: var(--text-primary);">Email Support</h4>
+                    <p style="color: var(--text-secondary);">support@sarthi.punjab.gov.in</p>
+                </div>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <h4 style="color: var(--text-primary);">Head Office</h4>
+                    <p style="color: var(--text-secondary);">Punjab Transport Department, Sector 17, Chandigarh</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3 style="color: var(--accent-blue); margin-bottom: 1rem;">Send us a Message</h3>
+            <form style="display: grid; gap: 1rem;">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select>
+                        <option>General Inquiry</option>
+                        <option>Booking Issue</option>
+                        <option>Refund Request</option>
+                        <option>Complaint</option>
+                        <option>Suggestion</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.8rem; border-radius: 8px; min-height: 120px; resize: vertical;" placeholder="Enter your message"></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="max-width: 200px;">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Message
+                </button>
+            </form>
+        </div>
+
+        <div style="margin-top: 2rem; padding: 2rem; background: var(--bg-card); border-radius: 12px;">
+            <h3 style="color: var(--text-primary); margin-bottom: 1rem;">Emergency Contacts</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div>
+                    <h4 style="color: var(--accent-blue);">Police</h4>
+                    <p style="color: var(--text-secondary);">100</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--accent-blue);">Women Helpline</h4>
+                    <p style="color: var(--text-secondary);">1091</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--accent-blue);">Ambulance</h4>
+                    <p style="color: var(--text-secondary);">108</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation handling
+        const navLinks = document.querySelectorAll('.nav-link');
+        const contents = document.querySelectorAll('.content');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const navLinksContainer = document.getElementById('navLinks');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = link.dataset.page;
+                
+                // Update active nav
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                // Show corresponding content
+                contents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === page) {
+                        content.classList.add('active');
+                    }
+                });
+
+                // Close mobile menu if open
+                navLinksContainer.classList.remove('active');
+            });
+        });
+
+        // Mobile menu toggle
+        mobileMenu.addEventListener('click', () => {
+            navLinksContainer.classList.toggle('active');
+        });
+
+        // Initialize map when routes page is active
+        let mapInitialized = false;
+        document.querySelector('[data-page="routes"]').addEventListener('click', () => {
+            if (!mapInitialized) {
+                setTimeout(() => {
+                    const map = L.map('map').setView([30.7333, 76.7794], 7);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    // Add markers for major cities
+                    const cities = [
+                        {name: 'Amritsar', coords: [31.6340, 74.8723]},
+                        {name: 'Ludhiana', coords: [30.9010, 75.8573]},
+                        {name: 'Jalandhar', coords: [31.3260, 75.5762]},
+                        {name: 'Patiala', coords: [30.3398, 76.3869]},
+                        {name: 'Bathinda', coords: [30.2110, 74.9455]},
+                        {name: 'Mohali', coords: [30.7046, 76.7179]}
+                    ];
+
+                    cities.forEach(city => {
+                        L.marker(city.coords)
+                            .addTo(map)
+                            .bindPopup(`<b>${city.name}</b><br>Major Bus Terminal`);
+                    });
+
+                    // Draw some route lines
+                    const route1 = L.polyline([
+                        [31.6340, 74.8723], // Amritsar
+                        [31.3260, 75.5762], // Jalandhar
+                        [30.9010, 75.8573]  // Ludhiana
+                    ], {color: '#00b4d8', weight: 3, opacity: 0.7}).addTo(map);
+
+                    const route2 = L.polyline([
+                        [30.2110, 74.9455], // Bathinda
+                        [30.3398, 76.3869], // Patiala
+                        [30.7046, 76.7179]  // Mohali
+                    ], {color: '#00f5a0', weight: 3, opacity: 0.7}).addTo(map);
+
+                    mapInitialized = true;
+                }, 100);
+            }
+        });
+
+        // Show city stops
+        function showCityStops(city) {
+            const stopsContainer = document.getElementById('cityStops');
+            const stops = {
+                bathinda: [
+                    {name: 'Main Bus Stand', address: 'Railway Road, Bathinda', buses: '45'},
+                    {name: 'Civil Hospital Stop', address: 'Hospital Road', buses: '12'},
+                    {name: 'Thermal Plant Stop', address: 'Guru Nanak Dev Nagar', buses: '8'},
+                    {name: 'University Stop', address: 'University Road', buses: '15'}
+                ],
+                pathankot: [
+                    {name: 'Central Bus Terminal', address: 'Dalhousie Road', buses: '35'},
+                    {name: 'Railway Station Stop', address: 'Station Road', buses: '20'},
+                    {name: 'Hospital Chowk', address: 'Hospital Road', buses: '10'}
+                ],
+                hoshiarpur: [
+                    {name: 'New Bus Stand', address: 'Jalandhar Road', buses: '40'},
+                    {name: 'Old Bus Stand', address: 'City Center', buses: '25'},
+                    {name: 'College Stop', address: 'College Road', buses: '15'}
+                ],
+                moga: [
+                    {name: 'Main Bus Terminal', address: 'GT Road', buses: '30'},
+                    {name: 'City Center Stop', address: 'Mall Road', buses: '18'},
+                    {name: 'Industrial Area Stop', address: 'Industrial Area Phase 1', buses: '12'}
+                ]
+            };
+
+            if (stops[city]) {
+                stopsContainer.innerHTML = stops[city].map(stop => `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: var(--accent-blue); margin-bottom: 0.5rem;">
+                                    <i class="fas fa-map-pin"></i> ${stop.name}
+                                </h4>
+                                <p style="color: var(--text-secondary);">${stop.address}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="stat-number" style="font-size: 1.5rem;">${stop.buses}</div>
+                                <div class="stat-label">Daily Buses</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Simulate real-time updates for ETA
+        setInterval(() => {
+            const etaCards = document.querySelectorAll('.eta-card');
+            etaCards.forEach(card => {
+                const timeElement = card.querySelector('p:nth-of-type(2)');
+                if (timeElement && Math.random() > 0.7) {
+                    const currentTime = timeElement.textContent.match(/\d{1,2}:\d{2} [AP]M/);
+                    if (currentTime) {
+                        // Add subtle animation
+                        timeElement.style.animation = 'pulse 1s';
+                        setTimeout(() => {
+                            timeElement.style.animation = '';
+                        }, 1000);
+                    }
+                }
+            });
+        }, 5000);
+
+        // Form submissions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Show loading animation
+                const btn = form.querySelector('.btn-primary');
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = '<span class="loading"></span> Processing...';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    alert('This is a prototype. In a real application, this would process your request.');
+                }, 2000);
+            });
+        });
+
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
+</body>
+</html>
